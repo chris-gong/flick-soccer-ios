@@ -16,6 +16,7 @@ class GameViewController: UIViewController {
     // ball - 1
     // floor - 2
     // goal post - 4
+    // out of bounds - 8
     
     var sceneView: SCNView!
     var scene: SCNScene!
@@ -27,8 +28,12 @@ class GameViewController: UIViewController {
     
     var screenSize: CGSize!
     
+    var score: Int!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        score = 0
         
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
@@ -38,7 +43,6 @@ class GameViewController: UIViewController {
         screenSize = sceneView.frame.size
         
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
-        ballNode.physicsBody?.contactTestBitMask = 4
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
         
         fingerStartingPosition = CGPoint(x: 0, y: 0)
@@ -93,17 +97,32 @@ class GameViewController: UIViewController {
 extension GameViewController: SCNPhysicsContactDelegate {
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
         var contactNode: SCNNode!
+        var otherNode: SCNNode!
         
         guard contact.nodeA.name == "ball" || contact.nodeB.name == "ball" else {return}
         
-        guard contact.nodeA.name == "goalPost" || contact.nodeB.name == "goalPost" else {return}
-        
         if contact.nodeA.name == "ball" {
             contactNode = contact.nodeA
+            otherNode = contact.nodeB
         }
         else {
             contactNode = contact.nodeB
+            otherNode = contact.nodeB
         }
-        print("contact made between ball and goalPost")
+        
+        if otherNode.name == "goalPost" {
+            score += 1 // increment score if the ball made contact with the goal post
+        }
+        
+        if otherNode.name == "outOfBounds" {
+            score = 0 // reset the score back to zero if the ball missed the goal post
+        }
+        
+        print("Current score: ", score!)
+        
+        // reset the location and velocity of the ball
+        contactNode.physicsBody?.clearAllForces()
+        contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
+        contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
     }
 }
