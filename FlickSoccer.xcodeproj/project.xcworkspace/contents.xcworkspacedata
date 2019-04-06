@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:FlickSoccer.xcodeproj">
+      location = "group:/Users/Chris/Documents/iPhone Projects/FlickSoccer/FlickSoccer/ScoreDisplay.sks">
+   </FileRef>
+   <FileRef
+      location = "self:">
    </FileRef>
 </Workspace>

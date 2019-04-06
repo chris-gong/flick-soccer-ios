@@ -9,6 +9,7 @@
 import UIKit
 import QuartzCore
 import SceneKit
+import SpriteKit
 
 class GameViewController: UIViewController {
 
@@ -20,6 +21,8 @@ class GameViewController: UIViewController {
     
     var sceneView: SCNView!
     var scene: SCNScene!
+    var hud: SKScene!
+    var scoreLabel: SKLabelNode!
     
     var ballNode: SCNNode!
     var cameraNode: SCNNode!
@@ -35,6 +38,7 @@ class GameViewController: UIViewController {
         
         score = 0
         
+        // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
@@ -42,9 +46,22 @@ class GameViewController: UIViewController {
         
         screenSize = sceneView.frame.size
         
+        // positioning hud and its elements
+        hud = SKScene(fileNamed: "ScoreDisplay")
+        hud.scaleMode = .aspectFill
+        hud.position = CGPoint(x: 0, y: 0)
+        hud.size = CGSize(width: screenSize.width, height: screenSize.height)
+        hud.anchorPoint = CGPoint(x: 0.5, y: 0) //set the origin of the hud, values here go from 0 to 1 for both x and y
+        
+        scoreLabel = hud.childNode(withName: "scoreLabel") as? SKLabelNode
+        scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 13)
+        sceneView.overlaySKScene = hud
+        
+        // retrieving scnnode instances
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
         
+        // adding pan gesture
         fingerStartingPosition = CGPoint(x: 0, y: 0)
         let panGestureReocgnizer = UIPanGestureRecognizer(target: self, action: #selector(kickBall(_:)))
         sceneView.addGestureRecognizer(panGestureReocgnizer)
@@ -118,7 +135,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
             score = 0 // reset the score back to zero if the ball missed the goal post
         }
         
-        print("Current score: ", score!)
+        scoreLabel.text = String(score)
         
         // reset the location and velocity of the ball
         contactNode.physicsBody?.clearAllForces()
