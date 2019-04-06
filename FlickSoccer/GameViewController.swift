@@ -64,12 +64,16 @@ class GameViewController: UIViewController {
             // and checking if the swipe goes forwards
             print("pan gesture ended")
             let fingerEndingPosition = gesture.location(in: sceneView)
-            if fingerStartingPosition.y > fingerEndingPosition.y {
+            let screenWidth = screenSize.width
+            let screenHeight = screenSize.height
+            
+            // finger has to go forward up the screen and at least a certain distance
+            if fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
                 // calculate force
-                let screenWidth = screenSize.width
-                let screenHeight = screenSize.height
-                
-                let forceVector = SCNVector3(x: Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5), y: Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 5), z: -5 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))
+                let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
+                let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
+                let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)
+                let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                 ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
                 fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
             }
