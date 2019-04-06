@@ -32,11 +32,13 @@ class GameViewController: UIViewController {
         
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
+        scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
         
         screenSize = sceneView.frame.size
         
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
+        ballNode.physicsBody?.contactTestBitMask = 4
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
         
         fingerStartingPosition = CGPoint(x: 0, y: 0)
@@ -82,4 +84,22 @@ class GameViewController: UIViewController {
         return true
     }
 
+}
+
+extension GameViewController: SCNPhysicsContactDelegate {
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        var contactNode: SCNNode!
+        
+        guard contact.nodeA.name == "ball" || contact.nodeB.name == "ball" else {return}
+        
+        guard contact.nodeA.name == "goalPost" || contact.nodeB.name == "goalPost" else {return}
+        
+        if contact.nodeA.name == "ball" {
+            contactNode = contact.nodeA
+        }
+        else {
+            contactNode = contact.nodeB
+        }
+        print("contact made between ball and goalPost")
+    }
 }
