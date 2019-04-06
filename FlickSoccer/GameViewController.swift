@@ -14,13 +14,19 @@ class GameViewController: UIViewController {
 
     var sceneView: SCNView!
     var scene: SCNScene!
+    
+    var ballNode: SCNNode!
+    var cameraNode: SCNNode!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         sceneView = self.view as? SCNView
-        sceneView.allowsCameraControl = true
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         sceneView.scene = scene
+        
+        ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
+        cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
     }
 
     override var shouldAutorotate: Bool {
