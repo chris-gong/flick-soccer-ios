@@ -12,6 +12,11 @@ import SceneKit
 
 class GameViewController: UIViewController {
 
+    // category bitmasks
+    // ball - 1
+    // floor - 2
+    // goal post - 4
+    
     var sceneView: SCNView!
     var scene: SCNScene!
     
@@ -20,12 +25,16 @@ class GameViewController: UIViewController {
     
     var fingerStartingPosition: CGPoint!
     
+    var screenSize: CGSize!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         sceneView.scene = scene
+        
+        screenSize = sceneView.frame.size
         
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
@@ -55,7 +64,10 @@ class GameViewController: UIViewController {
             let fingerEndingPosition = gesture.location(in: sceneView)
             if fingerStartingPosition.y > fingerEndingPosition.y {
                 // calculate force
-                let forceVector = SCNVector3(x: Float(fingerEndingPosition.x - fingerStartingPosition.x) * 0.01, y: Float(fingerStartingPosition.y - fingerEndingPosition.y) * 0.01, z: -5)
+                let screenWidth = screenSize.width
+                let screenHeight = screenSize.height
+                
+                let forceVector = SCNVector3(x: Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5), y: Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 5), z: -5 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))
                 ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
                 fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
             }
