@@ -43,6 +43,7 @@ class GameViewController: UIViewController {
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
+        //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         
         screenSize = sceneView.frame.size
         
