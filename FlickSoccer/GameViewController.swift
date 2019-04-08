@@ -44,6 +44,7 @@ class GameViewController: UIViewController {
         scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
         //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
+        //sceneView.allowsCameraControl = true
         
         screenSize = sceneView.frame.size
         
@@ -118,16 +119,17 @@ extension GameViewController: SCNPhysicsContactDelegate {
         var otherNode: SCNNode!
         
         guard contact.nodeA.name == "ball" || contact.nodeB.name == "ball" else {return}
-        
+        print("contact was made")
         if contact.nodeA.name == "ball" {
             contactNode = contact.nodeA
             otherNode = contact.nodeB
         }
         else {
             contactNode = contact.nodeB
-            otherNode = contact.nodeB
+            otherNode = contact.nodeA
         }
         
+        print(otherNode.name)
         if otherNode.name == "goalPost" {
             score += 1 // increment score if the ball made contact with the goal post
         }
