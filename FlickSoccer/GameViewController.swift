@@ -40,6 +40,8 @@ class GameViewController: UIViewController {
     
     var ballMoving: Bool! // variable is used to decide whether to move the camera or not
     
+    // variable is used to prevent swiping more than twice
+    var swipeCount: Int! // first swipe is for swiping it up off the ground, second swipe is for curving it up, down, left, or right
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -47,6 +49,8 @@ class GameViewController: UIViewController {
         respawning = false
         bouncedOffPost = false
         ballMoving = false
+        swipeCount = 0
+        
         // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
         sceneView.delegate = self
@@ -90,27 +94,38 @@ class GameViewController: UIViewController {
         else if gesture.state == .ended {
             // get the position of the release of the user's finger
             // decide whether the ball should be kicked by either
-            // checking the amount of time passed between finger on and finger off
-            // checking if the swipe was long enough
-            // check if the swipe made contact with the ball
-            // check if the ball has already been kicked (not touching the ground)
-            // and checking if the swipe goes forwards
+            // checking the amount of time passed between finger on and finger off and see if the swipe was fast enough
+            // checking if the swipe was long enough (in y direction) for the first swipe
+            // check if the ball has already been kicked (first swipe made)
+            // use different forces for different swipes (first swipehas a z force, second swipe does not have a z force)
+            // and checking if the swipe goes forwards (in y direction) for the first swipe
             print("pan gesture ended")
             let fingerEndingPosition = gesture.location(in: sceneView)
             let screenWidth = screenSize.width
             let screenHeight = screenSize.height
-            
-            // finger has to go forward up the screen and at least a certain distance
-            if fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
-                // calculate force
+            if swipeCount == 0 { // first swipe
+                // finger has to go forward up the screen and at least a certain distance
+                if fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
+                    // calculate force
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
+                    let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
+                    let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)
+                    let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
+                    ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
+                    //fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
+                    ballMoving = true
+                    swipeCount += 1 // swipe count can only be incremented when a force has been applied
+                }
+            }
+            else if swipeCount == 1 { // second swipe
                 let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
-                let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
-                let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)
+                let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
+                let zForce = Float(0)
                 let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                 ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
-                fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
-                ballMoving = true
+                swipeCount += 1 // swipe count can only be incremented when a force has been applied
             }
+            
         }
         
     }
@@ -177,6 +192,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
 
             self.respawning = false
             self.ballMoving = false
+            self.swipeCount = 0
         }
         
         let actionSequence = SCNAction.sequence([waitAction, respawnAction])
@@ -200,6 +216,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 
                 self.bouncedOffPost = false
                 self.ballMoving = false
+                self.swipeCount = 0
             }
         }
         
