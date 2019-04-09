@@ -18,6 +18,7 @@ class GameViewController: UIViewController {
     // floor - 2
     // goal post - 4
     // out of bounds - 8
+    // score zone - 16
     
     var sceneView: SCNView!
     var scene: SCNScene!
@@ -37,14 +38,18 @@ class GameViewController: UIViewController {
     
     var bouncedOffPost: Bool! // variable is used to check if the ball bounced forward after hitting the goal post
     
+    var ballMoving: Bool! // variable is used to decide whether to move the camera or not
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         score = 0
         respawning = false
         bouncedOffPost = false
+        ballMoving = false
         // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
+        sceneView.delegate = self
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
@@ -104,6 +109,7 @@ class GameViewController: UIViewController {
                 let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                 ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
                 fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
+                ballMoving = true
             }
         }
         
@@ -167,8 +173,10 @@ extension GameViewController: SCNPhysicsContactDelegate {
             contactNode.physicsBody?.clearAllForces()
             contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
             contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+            self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
 
             self.respawning = false
+            self.ballMoving = false
         }
         
         let actionSequence = SCNAction.sequence([waitAction, respawnAction])
@@ -188,12 +196,35 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 contactNode.physicsBody?.clearAllForces()
                 contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
                 contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+                self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
                 
                 self.bouncedOffPost = false
+                self.ballMoving = false
             }
         }
         
         let actionSequence = SCNAction.sequence([waitAction, respawnAction])
         contactNode.runAction(actionSequence)
+    }
+}
+
+extension GameViewController: SCNSceneRendererDelegate {
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        if ballMoving {
+            let ball = ballNode.presentation
+            let ballPosition = ball.position
+            var cameraPosition = cameraNode.position
+            
+            let targetPosition = SCNVector3(x: ballPosition.x, y: cameraPosition.y + 0.5, z: cameraPosition.z - 1)
+            
+            let cameraDamping: Float = 0.1
+            
+            let xComponent = cameraPosition.x * (1 - cameraDamping) + targetPosition.x * cameraDamping
+            let yComponent = cameraPosition.y * (1 - cameraDamping) + targetPosition.y * cameraDamping
+            let zComponent = cameraPosition.z * (1 - cameraDamping) + targetPosition.z * cameraDamping
+            
+            cameraPosition = SCNVector3(x: xComponent, y: yComponent, z: zComponent)
+            cameraNode.position = cameraPosition
+        }
     }
 }
