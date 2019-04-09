@@ -33,11 +33,13 @@ class GameViewController: UIViewController {
     
     var score: Int!
     
+    var respawning: Bool!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         score = 0
-        
+        respawning = false
         // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
@@ -130,19 +132,53 @@ extension GameViewController: SCNPhysicsContactDelegate {
         }
         
         print(otherNode.name)
-        if otherNode.name == "goalPost" {
-            score += 1 // increment score if the ball made contact with the goal post
+        if otherNode.name == "scoreZone" {
+            let waitAction = SCNAction.wait(duration: 1)
+            let respawnAction = SCNAction.run { (node) in
+                // increment score if the ball made contact with the score zone
+                self.score += 1
+                self.scoreLabel.text = String(self.score)
+                // reset the location and velocity of the ball
+                contactNode.physicsBody?.clearAllForces()
+                contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
+                contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+                
+                self.respawning = false
+            }
+            
+            if !respawning {
+                self.respawning = true
+                let actionSequence = SCNAction.sequence([waitAction, respawnAction])
+                contactNode.runAction(actionSequence)
+            }
         }
         
         if otherNode.name == "outOfBounds" {
-            score = 0 // reset the score back to zero if the ball missed the goal post
+            let waitAction = SCNAction.wait(duration: 1)
+            let respawnAction = SCNAction.run { (node) in
+                // reset the score back to zero if the ball missed the goal post
+                self.score = 0
+                self.scoreLabel.text = String(self.score)
+                // reset the location and velocity of the ball
+                contactNode.physicsBody?.clearAllForces()
+                contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
+                contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+                
+                self.respawning = false
+            }
+            
+            if !respawning {
+                self.respawning = true
+                let actionSequence = SCNAction.sequence([waitAction, respawnAction])
+                contactNode.runAction(actionSequence)
+            }
+            
         }
         
-        scoreLabel.text = String(score)
         
-        // reset the location and velocity of the ball
-        contactNode.physicsBody?.clearAllForces()
-        contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
-        contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+        
+        
     }
+    
+    
 }
