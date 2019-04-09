@@ -33,13 +33,16 @@ class GameViewController: UIViewController {
     
     var score: Int!
     
-    var respawning: Bool!
+    var respawning: Bool! // variable is used to prevent double scoring due to fast contact/collisions being made
+    
+    var bouncedOffPost: Bool! // variable is used to check if the ball bounced forward after hitting the goal post
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         score = 0
         respawning = false
+        bouncedOffPost = false
         // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
@@ -133,52 +136,64 @@ extension GameViewController: SCNPhysicsContactDelegate {
         
         print(otherNode.name)
         if otherNode.name == "scoreZone" {
-            let waitAction = SCNAction.wait(duration: 1)
-            let respawnAction = SCNAction.run { (node) in
-                // increment score if the ball made contact with the score zone
-                self.score += 1
-                self.scoreLabel.text = String(self.score)
-                // reset the location and velocity of the ball
-                contactNode.physicsBody?.clearAllForces()
-                contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
-                contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
-                
-                self.respawning = false
-            }
-            
             if !respawning {
-                self.respawning = true
-                let actionSequence = SCNAction.sequence([waitAction, respawnAction])
-                contactNode.runAction(actionSequence)
+                runUpdateScoreAndRespawnSequence(contactNode: contactNode, score: score + 1)
             }
         }
         
         if otherNode.name == "outOfBounds" {
-            let waitAction = SCNAction.wait(duration: 1)
-            let respawnAction = SCNAction.run { (node) in
+            if !respawning {
+                runUpdateScoreAndRespawnSequence(contactNode: contactNode, score: 0)
+            }
+        }
+        
+        if otherNode.name == "topPost" || otherNode.name == "leftPost" || otherNode.name == "rightPost" {
+            if !bouncedOffPost && !respawning {
+                runBouncedOffGoalPostSequence(contactNode: contactNode, score: 0)
+            }
+        }
+        
+    }
+    
+    func runUpdateScoreAndRespawnSequence(contactNode: SCNNode, score: Int) {
+        respawning = true
+        bouncedOffPost = false
+        let waitAction = SCNAction.wait(duration: 1)
+        let respawnAction = SCNAction.run { (node) in
+            // reset the score back to zero if the ball missed the goal post
+            self.score = score
+            self.scoreLabel.text = String(self.score)
+            // reset the location and velocity of the ball
+            contactNode.physicsBody?.clearAllForces()
+            contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
+            contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
+
+            self.respawning = false
+        }
+        
+        let actionSequence = SCNAction.sequence([waitAction, respawnAction])
+        contactNode.runAction(actionSequence)
+    }
+    
+    func runBouncedOffGoalPostSequence(contactNode: SCNNode, score: Int) {
+        bouncedOffPost = true
+        let waitAction = SCNAction.wait(duration: 1)
+        let respawnAction = SCNAction.run { (node) in
+            // the only way that bouncedoffpost could be set to false is from being scored in the goal or reaching out of bounds in this one second time span
+            if self.bouncedOffPost {
                 // reset the score back to zero if the ball missed the goal post
-                self.score = 0
+                self.score = score
                 self.scoreLabel.text = String(self.score)
                 // reset the location and velocity of the ball
                 contactNode.physicsBody?.clearAllForces()
                 contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
                 contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
                 
-                self.respawning = false
+                self.bouncedOffPost = false
             }
-            
-            if !respawning {
-                self.respawning = true
-                let actionSequence = SCNAction.sequence([waitAction, respawnAction])
-                contactNode.runAction(actionSequence)
-            }
-            
         }
         
-        
-        
-        
+        let actionSequence = SCNAction.sequence([waitAction, respawnAction])
+        contactNode.runAction(actionSequence)
     }
-    
-    
 }
