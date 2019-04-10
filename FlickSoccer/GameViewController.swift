@@ -55,6 +55,8 @@ class GameViewController: UIViewController {
     var goalKeeperJumping: Bool! // variable is used to decide whether goal keeper is jumping or not
     var goalKeeperFalling: Bool! // variable is used to decide whether goal keeper is falling or not
     
+    var sounds: [String: SCNAudioSource]!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -111,6 +113,29 @@ class GameViewController: UIViewController {
         fingerStartingPosition = CGPoint(x: 0, y: 0)
         let panGestureReocgnizer = UIPanGestureRecognizer(target: self, action: #selector(kickBall(_:)))
         sceneView.addGestureRecognizer(panGestureReocgnizer)
+        
+        // add sounds to dictionary
+        let kickSound = SCNAudioSource(fileNamed: "kick.wav")!
+        let goalSound = SCNAudioSource(fileNamed: "goal.wav")!
+        let backgroundSound = SCNAudioSource(fileNamed: "cheering.mp3")!
+        
+        kickSound.load()
+        kickSound.volume = 0.4
+        kickSound.loops = false
+        goalSound.load()
+        goalSound.volume = 0.025
+        goalSound.loops = false
+        
+        sounds = [:]
+        sounds["kick"] = kickSound
+        sounds["goal"] = goalSound
+    
+        backgroundSound.volume = 0.1
+        backgroundSound.loops = true
+        backgroundSound.load()
+        
+        let musicPlayer = SCNAudioPlayer(source: backgroundSound)
+        ballNode.addAudioPlayer(musicPlayer)
     }
 
     @objc func kickBall(_ gesture: UIPanGestureRecognizer) {
@@ -134,6 +159,9 @@ class GameViewController: UIViewController {
             if swipeCount == 0 { // first swipe
                 // finger has to go forward up the screen and at least a certain distance
                 if fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
+                    // play kicking sound on the first swipe only
+                    let kickSound = sounds["kick"]!
+                    ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
                     // calculate force
                     let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
                     let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
@@ -226,6 +254,9 @@ extension GameViewController: SCNPhysicsContactDelegate {
             self.goalKeeperFalling = false
             
             if self.score > 0 {
+                // if the player scored play the goal sound
+                let goalSound = self.sounds["goal"]!
+                self.ballNode.runAction(SCNAction.playAudio(goalSound, waitForCompletion: false))
                 self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
                 if self.score > self.bestStreak {
                     self.bestStreak = self.score
@@ -269,6 +300,9 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 self.goalKeeperFalling = false
                 
                 if self.score > 0 {
+                    // if the player scored play the goal sound
+                    let goalSound = self.sounds["goal"]!
+                    self.ballNode.runAction(SCNAction.playAudio(goalSound, waitForCompletion: false))
                     self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
                     if self.score > self.bestStreak {
                         self.bestStreak = self.score
