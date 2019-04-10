@@ -197,10 +197,12 @@ extension GameViewController: SCNPhysicsContactDelegate {
             self.score = score
             self.scoreLabel.text = String(self.score)
             // reset the location and velocity of the ball
+            let xOffset = Double.random(in: -2..<3)
+            let zOffset = Double.random(in: 0..<5)
             contactNode.physicsBody?.clearAllForces()
             contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
-            contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
-            self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
+            contactNode.worldPosition = SCNVector3(x: Float(xOffset), y: 0.22, z: Float(20 + zOffset))
+            self.cameraNode.worldPosition = SCNVector3(x: Float(xOffset), y: 0.75, z: Float(22 + zOffset))
             self.goalKeeperNode.worldPosition = SCNVector3(x: 0, y: 0.925, z: 4.5)
             
             self.respawning = false
@@ -231,10 +233,12 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 self.score = score
                 self.scoreLabel.text = String(self.score)
                 // reset the location and velocity of the ball
+                let xOffset = Double.random(in: -2..<3)
+                let zOffset = Double.random(in: 0..<5)
                 contactNode.physicsBody?.clearAllForces()
                 contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
-                contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
-                self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
+                contactNode.worldPosition = SCNVector3(x: Float(xOffset), y: 0.22, z: Float(20 + zOffset))
+                self.cameraNode.worldPosition = SCNVector3(x: Float(xOffset), y: 0.75, z: Float(22 + zOffset))
                 self.goalKeeperNode.worldPosition = SCNVector3(x: 0, y: 0.925, z: 4.5)
                 
                 self.bouncedOffPostOrKeeper = false
