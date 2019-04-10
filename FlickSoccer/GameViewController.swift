@@ -77,19 +77,24 @@ class GameViewController: UIViewController {
         //sceneView.allowsCameraControl = true
         
         screenSize = sceneView.frame.size
+        let screenWidth = screenSize.width
+        let screenHeight = screenSize.height
+        let screenDiagonal = sqrt(pow(screenWidth, 2) + pow(screenHeight, 2))
         
         // positioning hud and its elements
         hud = SKScene(fileNamed: "art.scnassets/ScoreDisplay")
         hud.scaleMode = .aspectFill
         hud.position = CGPoint(x: 0, y: 0)
-        hud.size = CGSize(width: screenSize.width, height: screenSize.height)
+        hud.size = CGSize(width: screenWidth, height: screenHeight)
         hud.anchorPoint = CGPoint(x: 0.5, y: 0) //set the origin of the hud, values here go from 0 to 1 for both x and y
         
         scoreLabel = hud.childNode(withName: "scoreLabel") as? SKLabelNode
         scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 12)
+        scoreLabel.fontSize = screenDiagonal/15.422
         
         bestStreakLabel = hud.childNode(withName: "bestStreakLabel") as? SKLabelNode
-        bestStreakLabel.position = CGPoint(x: -screenSize.width/2 + screenSize.width/25 , y: screenSize.height/15 * 14)
+        bestStreakLabel.position = CGPoint(x: -screenWidth/2 + screenWidth/25 , y: screenHeight/15 * 14)
+        bestStreakLabel.fontSize = screenDiagonal/54.835
         
         let defaults = UserDefaults.standard
         bestStreak = defaults.integer(forKey: GameViewController.bestStreakKey)
@@ -113,7 +118,6 @@ class GameViewController: UIViewController {
         //print("pan gesture recognized")
         if gesture.state == .began {
             // save the original position of the user's finger
-            print("pan gesture started")
             fingerStartingPosition = gesture.location(in: sceneView)
         }
         else if gesture.state == .ended {
@@ -124,7 +128,6 @@ class GameViewController: UIViewController {
             // check if the ball has already been kicked (first swipe made)
             // use different forces for different swipes (first swipehas a z force, second swipe does not have a z force)
             // and checking if the swipe goes forwards (in y direction) for the first swipe
-            print("pan gesture ended")
             let fingerEndingPosition = gesture.location(in: sceneView)
             let screenWidth = screenSize.width
             let screenHeight = screenSize.height
