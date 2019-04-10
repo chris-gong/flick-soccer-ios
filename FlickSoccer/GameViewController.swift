@@ -212,6 +212,9 @@ extension GameViewController: SCNPhysicsContactDelegate {
         
         if otherNode.name == "scoreZone" {
             if !respawning {
+                // if the player scored play the goal sound
+                let goalSound = self.sounds["goal"]!
+                self.ballNode.runAction(SCNAction.playAudio(goalSound, waitForCompletion: false))
                 runUpdateScoreAndRespawnSequence(contactNode: contactNode, score: score + 1)
             }
         }
@@ -224,6 +227,9 @@ extension GameViewController: SCNPhysicsContactDelegate {
         
         if otherNode.name == "topPost" || otherNode.name == "leftPost" || otherNode.name == "rightPost" || otherNode.name == "goalKeeper" {
             if !bouncedOffPostOrKeeper && !respawning {
+                // if the ball bounces off the goal keeper or a post, play a sound (for now it's the kick sound)
+                let kickSound = sounds["kick"]!
+                ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
                 runBouncedOffGoalPostOrKeeperSequence(contactNode: contactNode, score: 0)
             }
         }
@@ -254,9 +260,6 @@ extension GameViewController: SCNPhysicsContactDelegate {
             self.goalKeeperFalling = false
             
             if self.score > 0 {
-                // if the player scored play the goal sound
-                let goalSound = self.sounds["goal"]!
-                self.ballNode.runAction(SCNAction.playAudio(goalSound, waitForCompletion: false))
                 self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
                 if self.score > self.bestStreak {
                     self.bestStreak = self.score
@@ -300,9 +303,6 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 self.goalKeeperFalling = false
                 
                 if self.score > 0 {
-                    // if the player scored play the goal sound
-                    let goalSound = self.sounds["goal"]!
-                    self.ballNode.runAction(SCNAction.playAudio(goalSound, waitForCompletion: false))
                     self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
                     if self.score > self.bestStreak {
                         self.bestStreak = self.score
