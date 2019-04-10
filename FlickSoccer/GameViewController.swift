@@ -47,6 +47,8 @@ class GameViewController: UIViewController {
     
     var ballMoving: Bool! // variable is used to decide whether to move the camera or not
     
+    var timeOfPanGestureStart: Date!
+    
     // variable is used to prevent swiping more than twice
     var swipeCount: Int! // first swipe is for swiping it up off the ground, second swipe is for curving it up, down, left, or right
     
@@ -144,6 +146,7 @@ class GameViewController: UIViewController {
         if gesture.state == .began {
             // save the original position of the user's finger
             fingerStartingPosition = gesture.location(in: sceneView)
+            timeOfPanGestureStart = Date()
         }
         else if gesture.state == .ended {
             // get the position of the release of the user's finger
@@ -158,7 +161,9 @@ class GameViewController: UIViewController {
             let screenHeight = screenSize.height
             if swipeCount == 0 { // first swipe
                 // finger has to go forward up the screen and at least a certain distance
-                if fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
+                let timeSincePanGestureStart = Calendar.current.dateComponents([.second], from: timeOfPanGestureStart, to: Date()).second ?? 0
+                // swipe can't be longer than one second
+                if timeSincePanGestureStart < 1 && fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
                     // play kicking sound on the first swipe only
                     let kickSound = sounds["kick"]!
                     ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
@@ -174,12 +179,16 @@ class GameViewController: UIViewController {
                 }
             }
             else if swipeCount == 1 { // second swipe
-                let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
-                let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
-                let zForce = Float(0)
-                let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
-                ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
-                swipeCount += 1 // swipe count can only be incremented when a force has been applied
+                let timeSincePanGestureStart = Calendar.current.dateComponents([.second], from: timeOfPanGestureStart, to: Date()).second ?? 0
+                // swipe can't be longer than one second long
+                if timeSincePanGestureStart < 1 {
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
+                    let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
+                    let zForce = Float(0)
+                    let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
+                    ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
+                    swipeCount += 1 // swipe count can only be incremented when a force has been applied
+                }
             }
             
         }
