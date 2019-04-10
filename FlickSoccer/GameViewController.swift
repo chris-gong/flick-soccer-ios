@@ -147,7 +147,6 @@ class GameViewController: UIViewController {
             // save the original position of the user's finger
             fingerStartingPosition = gesture.location(in: sceneView)
             timeOfPanGestureStart = Date()
-            print(timeOfPanGestureStart)
         }
         else if gesture.state == .ended {
             // get the position of the release of the user's finger
