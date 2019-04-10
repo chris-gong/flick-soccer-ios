@@ -10,6 +10,7 @@ import UIKit
 import QuartzCore
 import SceneKit
 import SpriteKit
+import GameplayKit
 
 class GameViewController: UIViewController {
 
@@ -27,6 +28,10 @@ class GameViewController: UIViewController {
     
     var ballNode: SCNNode!
     var cameraNode: SCNNode!
+    var goalKeeperNode: SCNNode!
+    
+    //var goalKeeperAgent: GKAgent3D!
+    //var ballAgent: GKAgent3D!
     
     var fingerStartingPosition: CGPoint!
     
@@ -73,9 +78,25 @@ class GameViewController: UIViewController {
         scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 13)
         sceneView.overlaySKScene = hud
         
-        // retrieving scnnode instances
+        // retrieving scnnode instances and defining gkagents
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
+        
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
+        
+        goalKeeperNode = scene.rootNode.childNode(withName: "goalKeeper", recursively: true)
+        
+        /*let goalKeeperPosition = goalKeeperNode.presentation.position
+        goalKeeperAgent = GKAgent3D()
+        goalKeeperAgent.speed = 1
+        goalKeeperAgent.position = vector_float3(goalKeeperPosition.x, goalKeeperPosition.y, goalKeeperPosition.z)
+        
+        let ballPosition = ballNode.presentation.position
+        ballAgent = GKAgent3D()
+        ballAgent.position = vector_float3(ballPosition.x, goalKeeperPosition.y, goalKeeperPosition.z)
+        ballAgent.delegate = self
+        ballAgent.update(deltaTime: Double(1.0/60.0))
+        
+        goalKeeperAgent.behavior = GKBehavior(goal: GKGoal(toSeekAgent: ballAgent), weight: 1)*/
         
         // adding pan gesture
         fingerStartingPosition = CGPoint(x: 0, y: 0)
@@ -136,7 +157,6 @@ class GameViewController: UIViewController {
     override var prefersStatusBarHidden: Bool {
         return true
     }
-
 }
 
 extension GameViewController: SCNPhysicsContactDelegate {
@@ -243,5 +263,23 @@ extension GameViewController: SCNSceneRendererDelegate {
             cameraPosition = SCNVector3(x: xComponent, y: yComponent, z: zComponent)
             cameraNode.position = cameraPosition
         }
+        
+        var ballPosition = ballNode.presentation.position
+        if ballPosition.x > 3.3 {
+            ballPosition.x = 3.3
+        }
+        else if ballPosition.x < -3.7 {
+            ballPosition.x = -3.7
+        }
+        //ballAgent.position = vector_float3(ballPosition.x, ballAgent.position.y, ballAgent.position.z)
+        goalKeeperNode.position = SCNVector3(ballPosition.x, goalKeeperNode.presentation.position.y, goalKeeperNode.presentation.position.z)
     }
 }
+
+/*extension GameViewController: GKAgentDelegate {
+    private func agentDidUpdate(_ agent: GKAgent3D) {
+        print("agent did update")
+        
+        goalKeeperAgent.position = vector_float3(agent.position.x, agent.position.y, agent.position.z)
+    }
+}*/
