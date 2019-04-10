@@ -22,10 +22,13 @@ class GameViewController: UIViewController {
     // score zone - 16
     // goal keeper - 32
     
+    static let bestStreakKey = "bestStreak"
+    
     var sceneView: SCNView!
     var scene: SCNScene!
     var hud: SKScene!
     var scoreLabel: SKLabelNode!
+    var bestStreakLabel: SKLabelNode!
     
     var ballNode: SCNNode!
     var cameraNode: SCNNode!
@@ -36,6 +39,7 @@ class GameViewController: UIViewController {
     var screenSize: CGSize!
     
     var score: Int!
+    var bestStreak: Int!
     
     var respawning: Bool! // variable is used to prevent double scoring due to fast contact/collisions being made
     
@@ -69,7 +73,7 @@ class GameViewController: UIViewController {
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
-        sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
+        //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         //sceneView.allowsCameraControl = true
         
         screenSize = sceneView.frame.size
@@ -82,7 +86,15 @@ class GameViewController: UIViewController {
         hud.anchorPoint = CGPoint(x: 0.5, y: 0) //set the origin of the hud, values here go from 0 to 1 for both x and y
         
         scoreLabel = hud.childNode(withName: "scoreLabel") as? SKLabelNode
-        scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 13)
+        scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 12)
+        
+        bestStreakLabel = hud.childNode(withName: "bestStreakLabel") as? SKLabelNode
+        bestStreakLabel.position = CGPoint(x: -screenSize.width/2 + screenSize.width/25 , y: screenSize.height/15 * 14)
+        
+        let defaults = UserDefaults.standard
+        bestStreak = defaults.integer(forKey: GameViewController.bestStreakKey)
+        bestStreakLabel.text = "Best Streak: \(bestStreak ?? 0)"
+        
         sceneView.overlaySKScene = hud
         
         // retrieving scnnode instances
@@ -167,7 +179,6 @@ extension GameViewController: SCNPhysicsContactDelegate {
             otherNode = contact.nodeA
         }
         
-        print(otherNode.name)
         if otherNode.name == "scoreZone" {
             if !respawning {
                 runUpdateScoreAndRespawnSequence(contactNode: contactNode, score: score + 1)
@@ -213,6 +224,13 @@ extension GameViewController: SCNPhysicsContactDelegate {
             
             if self.score > 0 {
                 self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+                if self.score > self.bestStreak {
+                    self.bestStreak = self.score
+                    self.bestStreakLabel.text = "Best Streak: \(self.bestStreak ?? 0)"
+                    
+                    let defaults = UserDefaults.standard
+                    defaults.set(self.bestStreak, forKey: GameViewController.bestStreakKey)
+                }
             }
             else {
                 self.goalKeeperSpeed = 0 // reset the goal keeper's speed once a score streak ends
@@ -249,6 +267,13 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 
                 if self.score > 0 {
                     self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+                    if self.score > self.bestStreak {
+                        self.bestStreak = self.score
+                        self.bestStreakLabel.text = "Best Streak: \(self.bestStreak ?? 0)"
+                        
+                        let defaults = UserDefaults.standard
+                        defaults.set(self.bestStreak, forKey: GameViewController.bestStreakKey)
+                    }
                 }
                 else {
                     self.goalKeeperSpeed = 0 // reset the goal keeper's speed once a score streak ends
