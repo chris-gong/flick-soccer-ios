@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		83D8317B2259680D0009C9BC /* ScoreDisplay.sks in Resources */ = {isa = PBXBuildFile; fileRef = 83D8317A2259680D0009C9BC /* ScoreDisplay.sks */; };
 		83FCB25722570677007A60BF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FCB25622570677007A60BF /* AppDelegate.swift */; };
 		83FCB25922570677007A60BF /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 83FCB25822570677007A60BF /* art.scnassets */; };
 		83FCB25B22570677007A60BF /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FCB25A22570677007A60BF /* GameViewController.swift */; };
@@ -17,7 +16,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		83D8317A2259680D0009C9BC /* ScoreDisplay.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = ScoreDisplay.sks; sourceTree = "<group>"; };
 		83FCB25322570676007A60BF /* FlickSoccer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlickSoccer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83FCB25622570677007A60BF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		83FCB25822570677007A60BF /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -58,7 +56,6 @@
 		83FCB25522570676007A60BF /* FlickSoccer */ = {
 			isa = PBXGroup;
 			children = (
-				83D8317A2259680D0009C9BC /* ScoreDisplay.sks */,
 				83FCB25622570677007A60BF /* AppDelegate.swift */,
 				83FCB25822570677007A60BF /* art.scnassets */,
 				83FCB25A22570677007A60BF /* GameViewController.swift */,
@@ -128,7 +125,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83D8317B2259680D0009C9BC /* ScoreDisplay.sks in Resources */,
 				83FCB25922570677007A60BF /* art.scnassets in Resources */,
 				83FCB26322570679007A60BF /* LaunchScreen.storyboard in Resources */,
 				83FCB26022570679007A60BF /* Assets.xcassets in Resources */,

@@ -20,6 +20,7 @@ class GameViewController: UIViewController {
     // goal post - 4
     // out of bounds - 8
     // score zone - 16
+    // goal keeper - 32
     
     var sceneView: SCNView!
     var scene: SCNScene!
@@ -30,9 +31,6 @@ class GameViewController: UIViewController {
     var cameraNode: SCNNode!
     var goalKeeperNode: SCNNode!
     
-    //var goalKeeperAgent: GKAgent3D!
-    //var ballAgent: GKAgent3D!
-    
     var fingerStartingPosition: CGPoint!
     
     var screenSize: CGSize!
@@ -41,20 +39,29 @@ class GameViewController: UIViewController {
     
     var respawning: Bool! // variable is used to prevent double scoring due to fast contact/collisions being made
     
-    var bouncedOffPost: Bool! // variable is used to check if the ball bounced forward after hitting the goal post
+    var bouncedOffPostOrKeeper: Bool! // variable is used to check if the ball bounced forward after hitting the goal post
     
     var ballMoving: Bool! // variable is used to decide whether to move the camera or not
     
     // variable is used to prevent swiping more than twice
     var swipeCount: Int! // first swipe is for swiping it up off the ground, second swipe is for curving it up, down, left, or right
+    
+    var goalKeeperSpeed: Float!
+    
+    var goalKeeperJumping: Bool! // variable is used to decide whether goal keeper is jumping or not
+    var goalKeeperFalling: Bool! // variable is used to decide whether goal keeper is falling or not
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         score = 0
         respawning = false
-        bouncedOffPost = false
+        bouncedOffPostOrKeeper = false
         ballMoving = false
         swipeCount = 0
+        goalKeeperSpeed = 0
+        goalKeeperJumping = false
+        goalKeeperFalling = false
         
         // retrieving scnview and scnscene instances
         sceneView = self.view as? SCNView
@@ -62,13 +69,13 @@ class GameViewController: UIViewController {
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
         sceneView.scene = scene
-        //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
+        sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         //sceneView.allowsCameraControl = true
         
         screenSize = sceneView.frame.size
         
         // positioning hud and its elements
-        hud = SKScene(fileNamed: "ScoreDisplay")
+        hud = SKScene(fileNamed: "art.scnassets/ScoreDisplay")
         hud.scaleMode = .aspectFill
         hud.position = CGPoint(x: 0, y: 0)
         hud.size = CGSize(width: screenSize.width, height: screenSize.height)
@@ -78,25 +85,10 @@ class GameViewController: UIViewController {
         scoreLabel.position = CGPoint(x: 0, y: screenSize.height/15 * 13)
         sceneView.overlaySKScene = hud
         
-        // retrieving scnnode instances and defining gkagents
+        // retrieving scnnode instances
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
-        
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
-        
         goalKeeperNode = scene.rootNode.childNode(withName: "goalKeeper", recursively: true)
-        
-        /*let goalKeeperPosition = goalKeeperNode.presentation.position
-        goalKeeperAgent = GKAgent3D()
-        goalKeeperAgent.speed = 1
-        goalKeeperAgent.position = vector_float3(goalKeeperPosition.x, goalKeeperPosition.y, goalKeeperPosition.z)
-        
-        let ballPosition = ballNode.presentation.position
-        ballAgent = GKAgent3D()
-        ballAgent.position = vector_float3(ballPosition.x, goalKeeperPosition.y, goalKeeperPosition.z)
-        ballAgent.delegate = self
-        ballAgent.update(deltaTime: Double(1.0/60.0))
-        
-        goalKeeperAgent.behavior = GKBehavior(goal: GKGoal(toSeekAgent: ballAgent), weight: 1)*/
         
         // adding pan gesture
         fingerStartingPosition = CGPoint(x: 0, y: 0)
@@ -165,7 +157,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
         var otherNode: SCNNode!
         
         guard contact.nodeA.name == "ball" || contact.nodeB.name == "ball" else {return}
-        print("contact was made")
+        
         if contact.nodeA.name == "ball" {
             contactNode = contact.nodeA
             otherNode = contact.nodeB
@@ -188,9 +180,9 @@ extension GameViewController: SCNPhysicsContactDelegate {
             }
         }
         
-        if otherNode.name == "topPost" || otherNode.name == "leftPost" || otherNode.name == "rightPost" {
-            if !bouncedOffPost && !respawning {
-                runBouncedOffGoalPostSequence(contactNode: contactNode, score: 0)
+        if otherNode.name == "topPost" || otherNode.name == "leftPost" || otherNode.name == "rightPost" || otherNode.name == "goalKeeper" {
+            if !bouncedOffPostOrKeeper && !respawning {
+                runBouncedOffGoalPostOrKeeperSequence(contactNode: contactNode, score: 0)
             }
         }
         
@@ -198,7 +190,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
     
     func runUpdateScoreAndRespawnSequence(contactNode: SCNNode, score: Int) {
         respawning = true
-        bouncedOffPost = false
+        bouncedOffPostOrKeeper = false
         let waitAction = SCNAction.wait(duration: 1)
         let respawnAction = SCNAction.run { (node) in
             // reset the score back to zero if the ball missed the goal post
@@ -209,22 +201,32 @@ extension GameViewController: SCNPhysicsContactDelegate {
             contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
             contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
             self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
-
+            self.goalKeeperNode.worldPosition = SCNVector3(x: 0, y: 0.925, z: 4.5)
+            
             self.respawning = false
             self.ballMoving = false
             self.swipeCount = 0
+            self.goalKeeperJumping = false
+            self.goalKeeperFalling = false
+            
+            if self.score > 0 {
+                self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+            }
+            else {
+                self.goalKeeperSpeed = 0 // reset the goal keeper's speed once a score streak ends
+            }
         }
         
         let actionSequence = SCNAction.sequence([waitAction, respawnAction])
         contactNode.runAction(actionSequence)
     }
     
-    func runBouncedOffGoalPostSequence(contactNode: SCNNode, score: Int) {
-        bouncedOffPost = true
+    func runBouncedOffGoalPostOrKeeperSequence(contactNode: SCNNode, score: Int) {
+        bouncedOffPostOrKeeper = true
         let waitAction = SCNAction.wait(duration: 1)
         let respawnAction = SCNAction.run { (node) in
-            // the only way that bouncedoffpost could be set to false is from being scored in the goal or reaching out of bounds in this one second time span
-            if self.bouncedOffPost {
+            // the only way that bouncedoffpostorkeeper could be set to false is from being scored in the goal or reaching out of bounds in this one second time span
+            if self.bouncedOffPostOrKeeper {
                 // reset the score back to zero if the ball missed the goal post
                 self.score = score
                 self.scoreLabel.text = String(self.score)
@@ -233,10 +235,20 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 contactNode.physicsBody?.velocity = SCNVector3(x: 0, y: 0, z: 0)
                 contactNode.worldPosition = SCNVector3(x: 0, y: 0.22, z: 20)
                 self.cameraNode.worldPosition = SCNVector3(x: 0, y: 0.75, z: 22)
+                self.goalKeeperNode.worldPosition = SCNVector3(x: 0, y: 0.925, z: 4.5)
                 
-                self.bouncedOffPost = false
+                self.bouncedOffPostOrKeeper = false
                 self.ballMoving = false
                 self.swipeCount = 0
+                self.goalKeeperJumping = false
+                self.goalKeeperFalling = false
+                
+                if self.score > 0 {
+                    self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+                }
+                else {
+                    self.goalKeeperSpeed = 0 // reset the goal keeper's speed once a score streak ends
+                }
             }
         }
         
@@ -265,21 +277,36 @@ extension GameViewController: SCNSceneRendererDelegate {
         }
         
         var ballPosition = ballNode.presentation.position
-        if ballPosition.x > 3.3 {
-            ballPosition.x = 3.3
+        var goalKeeperPosition = goalKeeperNode.presentation.position
+ 
+        if ballPosition.x > 3.2 {
+            ballPosition.x = 3.2
         }
-        else if ballPosition.x < -3.7 {
-            ballPosition.x = -3.7
+        else if ballPosition.x < -3.2 {
+            ballPosition.x = -3.2
         }
-        //ballAgent.position = vector_float3(ballPosition.x, ballAgent.position.y, ballAgent.position.z)
-        goalKeeperNode.position = SCNVector3(ballPosition.x, goalKeeperNode.presentation.position.y, goalKeeperNode.presentation.position.z)
+        
+        if ballPosition.y > 1.5 && !goalKeeperJumping && !goalKeeperFalling {
+            goalKeeperJumping = true
+        }
+        if goalKeeperJumping && !goalKeeperFalling {
+            if goalKeeperPosition.y < 0.5 {
+                goalKeeperPosition.y = goalKeeperPosition.y + 0.1
+            }
+            else {
+                goalKeeperJumping = false
+                goalKeeperFalling = true
+            }
+        }
+        else if !goalKeeperJumping && goalKeeperFalling {
+            if goalKeeperPosition.y > 0 {
+                goalKeeperPosition.y = goalKeeperPosition.y - 0.1
+            }
+            else {
+                goalKeeperJumping = false
+                goalKeeperFalling = false
+            }
+        }
+        goalKeeperNode.position = SCNVector3(goalKeeperPosition.x * (1 - goalKeeperSpeed) + ballPosition.x * goalKeeperSpeed, goalKeeperPosition.y, goalKeeperPosition.z)
     }
 }
-
-/*extension GameViewController: GKAgentDelegate {
-    private func agentDidUpdate(_ agent: GKAgent3D) {
-        print("agent did update")
-        
-        goalKeeperAgent.position = vector_float3(agent.position.x, agent.position.y, agent.position.z)
-    }
-}*/
