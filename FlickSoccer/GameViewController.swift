@@ -13,7 +13,7 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
-
+    
     // category bitmasks
     // ball - 1
     // floor - 2
@@ -76,6 +76,7 @@ class GameViewController: UIViewController {
         sceneView.delegate = self
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
+        scene.physicsWorld.gravity = SCNVector3(x: 0, y: -0.98, z: 0)
         sceneView.scene = scene
         //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         //sceneView.allowsCameraControl = true
@@ -131,7 +132,7 @@ class GameViewController: UIViewController {
         sounds = [:]
         sounds["kick"] = kickSound
         sounds["goal"] = goalSound
-    
+        
         backgroundSound.volume = 0.1
         backgroundSound.loops = true
         backgroundSound.load()
@@ -139,7 +140,7 @@ class GameViewController: UIViewController {
         let musicPlayer = SCNAudioPlayer(source: backgroundSound)
         ballNode.addAudioPlayer(musicPlayer)
     }
-
+    
     @objc func kickBall(_ gesture: UIPanGestureRecognizer) {
         guard gesture.view != nil else {return} // pan gesture needs to occur on an actual view
         //print("pan gesture recognized")
@@ -168,9 +169,9 @@ class GameViewController: UIViewController {
                     let kickSound = sounds["kick"]!
                     ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
                     // calculate force
-                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/100
-                    let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)/100
-                    let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)/100
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/2.2
+                    let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
+                    let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)/2.7
                     let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                     ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
                     //fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
@@ -182,8 +183,8 @@ class GameViewController: UIViewController {
                 let timeSincePanGestureStart = Calendar.current.dateComponents([.nanosecond], from: timeOfPanGestureStart, to: Date()).nanosecond ?? 0
                 // swipe can't be longer than half a second
                 if timeSincePanGestureStart < 500000000 {
-                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/100
-                    let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)/100
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/2.2
+                    let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
                     let zForce = Float(0)
                     let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                     ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
@@ -269,7 +270,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
             self.goalKeeperFalling = false
             
             if self.score > 0 {
-                self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+                self.goalKeeperSpeed += 0.05 // make the goal keeper faster if a goal was made
                 if self.score > self.bestStreak {
                     self.bestStreak = self.score
                     self.bestStreakLabel.text = "Best Streak: \(self.bestStreak ?? 0)"
@@ -312,7 +313,7 @@ extension GameViewController: SCNPhysicsContactDelegate {
                 self.goalKeeperFalling = false
                 
                 if self.score > 0 {
-                    self.goalKeeperSpeed += 0.1 // make the goal keeper faster if a goal was made
+                    self.goalKeeperSpeed += 0.05 // make the goal keeper faster if a goal was made
                     if self.score > self.bestStreak {
                         self.bestStreak = self.score
                         self.bestStreakLabel.text = "Best Streak: \(self.bestStreak ?? 0)"
@@ -339,9 +340,9 @@ extension GameViewController: SCNSceneRendererDelegate {
             let ballPosition = ball.position
             var cameraPosition = cameraNode.position
             
-            let targetPosition = SCNVector3(x: ballPosition.x, y: cameraPosition.y + 0.05, z: cameraPosition.z - 0.1)
+            let targetPosition = SCNVector3(x: ballPosition.x, y: cameraPosition.y + 0.1, z: cameraPosition.z - 0.5)
             
-            let cameraDamping: Float = 0.1
+            let cameraDamping: Float = 0.09
             
             let xComponent = cameraPosition.x * (1 - cameraDamping) + targetPosition.x * cameraDamping
             let yComponent = cameraPosition.y * (1 - cameraDamping) + targetPosition.y * cameraDamping
@@ -353,7 +354,7 @@ extension GameViewController: SCNSceneRendererDelegate {
         
         var ballPosition = ballNode.presentation.position
         var goalKeeperPosition = goalKeeperNode.presentation.position
- 
+        
         if ballPosition.x > 3.2 {
             ballPosition.x = 3.2
         }
@@ -366,7 +367,7 @@ extension GameViewController: SCNSceneRendererDelegate {
         }
         if goalKeeperJumping && !goalKeeperFalling {
             if goalKeeperPosition.y < 0.5 {
-                goalKeeperPosition.y = goalKeeperPosition.y + 0.1
+                goalKeeperPosition.y = goalKeeperPosition.y + 0.03
             }
             else {
                 goalKeeperJumping = false
@@ -375,7 +376,7 @@ extension GameViewController: SCNSceneRendererDelegate {
         }
         else if !goalKeeperJumping && goalKeeperFalling {
             if goalKeeperPosition.y > 0 {
-                goalKeeperPosition.y = goalKeeperPosition.y - 0.1
+                goalKeeperPosition.y = goalKeeperPosition.y - 0.03
             }
             else {
                 goalKeeperJumping = false
