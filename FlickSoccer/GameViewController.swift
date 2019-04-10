@@ -147,6 +147,7 @@ class GameViewController: UIViewController {
             // save the original position of the user's finger
             fingerStartingPosition = gesture.location(in: sceneView)
             timeOfPanGestureStart = Date()
+            print(timeOfPanGestureStart)
         }
         else if gesture.state == .ended {
             // get the position of the release of the user's finger
@@ -160,10 +161,10 @@ class GameViewController: UIViewController {
             let screenWidth = screenSize.width
             let screenHeight = screenSize.height
             if swipeCount == 0 { // first swipe
-                // finger has to go forward up the screen and at least a certain distance
-                let timeSincePanGestureStart = Calendar.current.dateComponents([.second], from: timeOfPanGestureStart, to: Date()).second ?? 0
-                // swipe can't be longer than one second
-                if timeSincePanGestureStart < 1 && fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
+                // finger has to go forward up the screen and at least a certain distance and in a certain time
+                let timeSincePanGestureStart = Calendar.current.dateComponents([.nanosecond], from: timeOfPanGestureStart, to: Date()).nanosecond ?? 0
+                // swipe can't be longer than half a second
+                if timeSincePanGestureStart < 500000000 && fingerStartingPosition.y > fingerEndingPosition.y && (fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight > 0.2 {
                     // play kicking sound on the first swipe only
                     let kickSound = sounds["kick"]!
                     ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
@@ -179,9 +180,9 @@ class GameViewController: UIViewController {
                 }
             }
             else if swipeCount == 1 { // second swipe
-                let timeSincePanGestureStart = Calendar.current.dateComponents([.second], from: timeOfPanGestureStart, to: Date()).second ?? 0
-                // swipe can't be longer than one second long
-                if timeSincePanGestureStart < 1 {
+                let timeSincePanGestureStart = Calendar.current.dateComponents([.nanosecond], from: timeOfPanGestureStart, to: Date()).nanosecond ?? 0
+                // swipe can't be longer than half a second
+                if timeSincePanGestureStart < 500000000 {
                     let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
                     let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
                     let zForce = Float(0)
