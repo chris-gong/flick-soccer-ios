@@ -76,7 +76,8 @@ class GameViewController: UIViewController {
         sceneView.delegate = self
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
-        scene.physicsWorld.gravity = SCNVector3(x: 0, y: -0.98, z: 0)
+        //scene.physicsWorld.gravity = SCNVector3(x: 0, y: -0.98, z: 0)
+        scene.physicsWorld.speed = 1.0
         sceneView.scene = scene
         //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         //sceneView.allowsCameraControl = true
@@ -169,9 +170,9 @@ class GameViewController: UIViewController {
                     let kickSound = sounds["kick"]!
                     ballNode.runAction(SCNAction.playAudio(kickSound, waitForCompletion: false))
                     // calculate force
-                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/2.2
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
                     let yForce = 1 + Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 1.5)
-                    let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)/2.7
+                    let zForce = Float(-12 + ((1 - ((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight))) * 3)
                     let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
                     ballNode.physicsBody?.applyForce(forceVector, asImpulse: true)
                     //fingerStartingPosition = CGPoint(x: 0, y: 0) // reset starting position (probably not necessary)
@@ -183,7 +184,7 @@ class GameViewController: UIViewController {
                 let timeSincePanGestureStart = Calendar.current.dateComponents([.nanosecond], from: timeOfPanGestureStart, to: Date()).nanosecond ?? 0
                 // swipe can't be longer than half a second
                 if timeSincePanGestureStart < 500000000 {
-                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)/2.2
+                    let xForce = Float((fingerEndingPosition.x - fingerStartingPosition.x)/screenWidth * 5)
                     let yForce = Float((fingerStartingPosition.y - fingerEndingPosition.y)/screenHeight * 2.5)
                     let zForce = Float(0)
                     let forceVector = SCNVector3(x: xForce, y: yForce, z: zForce)
@@ -342,7 +343,7 @@ extension GameViewController: SCNSceneRendererDelegate {
             
             let targetPosition = SCNVector3(x: ballPosition.x, y: cameraPosition.y + 0.1, z: cameraPosition.z - 0.5)
             
-            let cameraDamping: Float = 0.09
+            let cameraDamping: Float = 0.1
             
             let xComponent = cameraPosition.x * (1 - cameraDamping) + targetPosition.x * cameraDamping
             let yComponent = cameraPosition.y * (1 - cameraDamping) + targetPosition.y * cameraDamping
