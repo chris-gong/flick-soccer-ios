@@ -77,7 +77,7 @@ class GameViewController: UIViewController {
         scene = SCNScene(named: "art.scnassets/MainScene.scn")
         scene.physicsWorld.contactDelegate = self
         //scene.physicsWorld.gravity = SCNVector3(x: 0, y: -0.98, z: 0)
-        scene.physicsWorld.speed = 1.0
+        scene.physicsWorld.speed = 2
         sceneView.scene = scene
         //sceneView.debugOptions = SCNDebugOptions.showPhysicsShapes
         //sceneView.allowsCameraControl = true
