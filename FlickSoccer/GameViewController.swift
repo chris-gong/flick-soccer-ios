@@ -111,7 +111,7 @@ class GameViewController: UIViewController {
         // retrieving scnnode instances
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)
         cameraNode = scene.rootNode.childNode(withName: "camera", recursively: true)
-        goalKeeperNode = scene.rootNode.childNode(withName:  "goalKeeper", recursively: true)
+        goalKeeperNode = scene.rootNode.childNode(withName: "goalKeeper", recursively: true)
         
         // adding pan gesture
         fingerStartingPosition = CGPoint(x: 0, y: 0)
