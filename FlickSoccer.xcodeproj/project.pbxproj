@@ -22,6 +22,7 @@
 		83338E3E225E516C00443CDC /* goal.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = goal.wav; sourceTree = "<group>"; };
 		83338E3F225E516C00443CDC /* cheering.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = cheering.mp3; sourceTree = "<group>"; };
 		83338E40225E516C00443CDC /* kick.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = kick.wav; sourceTree = "<group>"; };
+		83D562C0228359C100471343 /* FlickSoccer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FlickSoccer.entitlements; sourceTree = "<group>"; };
 		83FCB25322570676007A60BF /* FlickSoccer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlickSoccer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83FCB25622570677007A60BF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		83FCB25822570677007A60BF /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -53,11 +54,19 @@
 			path = Sounds;
 			sourceTree = "<group>";
 		};
+		83D562BD2283597100471343 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		83FCB24A22570676007A60BF = {
 			isa = PBXGroup;
 			children = (
 				83FCB25522570676007A60BF /* FlickSoccer */,
 				83FCB25422570676007A60BF /* Products */,
+				83D562BD2283597100471343 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -72,6 +81,7 @@
 		83FCB25522570676007A60BF /* FlickSoccer */ = {
 			isa = PBXGroup;
 			children = (
+				83D562C0228359C100471343 /* FlickSoccer.entitlements */,
 				83338E3D225E516C00443CDC /* Sounds */,
 				83FCB25622570677007A60BF /* AppDelegate.swift */,
 				83FCB25822570677007A60BF /* art.scnassets */,
@@ -116,6 +126,26 @@
 				TargetAttributes = {
 					83FCB25222570676007A60BF = {
 						CreatedOnToolsVersion = 10.2;
+						SystemCapabilities = {
+							com.apple.AccessWiFi = {
+								enabled = 0;
+							};
+							com.apple.BackgroundModes = {
+								enabled = 0;
+							};
+							com.apple.ClassKit = {
+								enabled = 0;
+							};
+							com.apple.GameCenter.iOS = {
+								enabled = 0;
+							};
+							com.apple.InAppPurchase = {
+								enabled = 0;
+							};
+							com.apple.WAC = {
+								enabled = 0;
+							};
+						};
 					};
 				};
 			};
@@ -314,7 +344,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ChrisGong.FlickSoccer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ChrisGong.SwipeSoccer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -334,7 +364,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ChrisGong.FlickSoccer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ChrisGong.SwipeSoccer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
