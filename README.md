@@ -1,6 +1,6 @@
 # Flick Soccer
 ### What is Flick Soccer
-Flick Soccer is a remake of the popular mobile game, Flick Shoot, made using Swift and SceneKit. Our version only has one game mode, scoring against an AI that gets progressively harder as you score more goals. Currently, the ball is kicked by swiping the ball once to get it off the ground and the ball is curved by swiping the ball again after lift off. If you're interested in getting this game for your iOS device from the app store, then download it [here](https://itunes.apple.com/us/app/swipe-soccer/id1462961406?ls=1&mt=8). If you're interested in how the game was made, then I'd highly encourage you to check out our [youtube channel](https://youtu.be/kjEC1U_MmPg). 
+Flick Soccer is a remake of the popular mobile game, Flick Shoot, made using Swift and SceneKit. Our version only has one game mode, scoring against an AI that gets progressively harder as you score more goals. Currently, the ball is kicked by swiping the ball once to get it off the ground and the ball is curved by swiping the ball again after lift off. If you're interested in getting this game for your iOS device from the app store, then download it [here](https://itunes.apple.com/us/app/swipe-soccer/id1462961406). If you're interested in how the game was made, then I'd highly encourage you to check out our [youtube channel](https://youtu.be/kjEC1U_MmPg). 
 
 ![Imgur1](https://i.imgur.com/kkyrJ04m.png)
 ![Imgur2](https://i.imgur.com/CkJ9nUPm.png)
